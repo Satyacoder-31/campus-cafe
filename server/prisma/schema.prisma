@@ -1,0 +1,147 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  name           String
+  collegeId      String    @unique
+  email          String    @unique
+  passwordHash   String
+  phone          String?
+  role           String    @default("student") // "student" | "admin"
+  avatar         String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  orders         Order[]
+  reviews        Review[]
+  favorites      Favorite[]
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  icon      String?
+  sortOrder Int        @default(0)
+  foodItems FoodItem[]
+}
+
+model FoodItem {
+  id           Int       @id @default(autoincrement())
+  name         String
+  description  String
+  price        Float
+  image        String
+  isVeg        Boolean   @default(true)
+  rating       Float     @default(4.0)
+  ratingCount  Int       @default(0)
+  isAvailable  Boolean   @default(true)
+  isSpecial    Boolean   @default(false)
+  calories     Int?
+  ingredients  String?   // JSON string
+  addOns       String?   // JSON string
+  categoryId   Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  category     Category    @relation(fields: [categoryId], references: [id])
+  orderItems   OrderItem[]
+  reviews      Review[]
+  favorites    Favorite[]
+  inventory    Inventory[]
+}
+
+model Order {
+  id              Int       @id @default(autoincrement())
+  orderNumber     String    @unique
+  userId          Int
+  status          String    @default("placed") 
+  // placed | confirmed | preparing | ready | completed | cancelled
+  paymentMethod   String    @default("cash") // upi | card | cash
+  paymentStatus   String    @default("pending") // pending | paid
+  subtotal        Float
+  tax             Float
+  discount        Float     @default(0)
+  total           Float
+  couponCode      String?
+  notes           String?
+  estimatedTime   Int       @default(15) // minutes
+  pickupType      String    @default("counter") // counter | table
+  tableNumber     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id           Int      @id @default(autoincrement())
+  orderId      Int
+  foodItemId   Int
+  quantity     Int
+  price        Float
+  addOns       String?  // JSON string
+  specialNote  String?
+
+  order        Order    @relation(fields: [orderId], references: [id])
+  foodItem     FoodItem @relation(fields: [foodItemId], references: [id])
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  foodItemId Int
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+  foodItem   FoodItem @relation(fields: [foodItemId], references: [id])
+}
+
+model Favorite {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  foodItemId Int
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+  foodItem   FoodItem @relation(fields: [foodItemId], references: [id])
+
+  @@unique([userId, foodItemId])
+}
+
+model Inventory {
+  id           Int      @id @default(autoincrement())
+  foodItemId   Int
+  ingredient   String
+  currentStock Float
+  minStock     Float
+  unit         String
+  updatedAt    DateTime @updatedAt
+
+  foodItem     FoodItem @relation(fields: [foodItemId], references: [id])
+}
+
+model Coupon {
+  id           Int      @id @default(autoincrement())
+  code         String   @unique
+  discount     Float    // percentage
+  maxDiscount  Float?
+  minOrder     Float    @default(0)
+  usageLimit   Int      @default(100)
+  usedCount    Int      @default(0)
+  isActive     Boolean  @default(true)
+  expiresAt    DateTime?
+  createdAt    DateTime @default(now())
+}
