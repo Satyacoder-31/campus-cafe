@@ -7,7 +7,8 @@ const auth = (req, res, next) => {
   }
   const token = authHeader.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || 'campus_cafe_jwt_secret_2026_very_secure';
+    const decoded = jwt.verify(token, secret);
     req.user = decoded;
     next();
   } catch (err) {

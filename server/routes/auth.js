@@ -21,7 +21,9 @@ router.post('/register', async (req, res) => {
       data: { name, collegeId, email, passwordHash, phone, role: 'student' },
     });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+    const secret = process.env.JWT_SECRET || 'campus_cafe_jwt_secret_2026_very_secure';
+    const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    const token = jwt.sign({ id: user.id, role: user.role }, secret, { expiresIn });
     const { passwordHash: _, ...userSafe } = user;
     res.status(201).json({ token, user: userSafe });
   } catch (err) {
@@ -41,7 +43,9 @@ router.post('/login', async (req, res) => {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+    const secret = process.env.JWT_SECRET || 'campus_cafe_jwt_secret_2026_very_secure';
+    const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
+    const token = jwt.sign({ id: user.id, role: user.role }, secret, { expiresIn });
     const { passwordHash: _, ...userSafe } = user;
     res.json({ token, user: userSafe });
   } catch (err) {
