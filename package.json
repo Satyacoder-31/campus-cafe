@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "description": "Campus Café — College Canteen Management System",
   "scripts": {
+    "build": "cd server && npm install && npx prisma generate",
+    "start": "cd server && node server.js",
     "install:all": "cd server && npm install && cd ../client && npm install",
-    "setup:db": "cd server && npx prisma generate && npx prisma migrate dev --name init && node prisma/seed.js",
+    "setup:db": "cd server && npx prisma generate && node prisma/seed.js",
     "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm run dev",
-    "start": "echo 'Run dev:server and dev:client in separate terminals. See README.md'"
+    "dev:client": "cd client && npm run dev"
   },
-  "keywords": ["canteen", "food-ordering", "mern", "campus"]
+  "keywords": [
+    "canteen",
+    "food-ordering",
+    "mern",
+    "campus"
+  ]
 }
